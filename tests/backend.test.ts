@@ -34,6 +34,14 @@ describe('health tracker backend', () => {
     expect(repo.getDailySummary('2026-05-29').totals).toEqual({ calories: 150, protein: 25.5, carbs: 9, fat: 0 });
   });
 
+  it('edits saved foods', () => {
+    const food = repo.createFood({ name: 'Oatmeal', brand: 'Kitchen', servingQty: 1, servingUnit: 'bowl', calories: 300, protein: 12, carbs: 48, fat: 6 });
+
+    const updated = repo.updateFood(food.id, { name: 'Oats', brand: null, servingQty: 1, servingUnit: 'bowl', calories: 320, protein: 13, carbs: 50, fat: 7 });
+
+    expect(updated).toMatchObject({ name: 'Oats', brand: null, calories: 320, protein: 13, carbs: 50, fat: 7 });
+  });
+
   it('creates meals and logs meal snapshots', () => {
     const rice = repo.createFood({ name: 'Rice', brand: null, servingQty: 1, servingUnit: 'cup', calories: 205, protein: 4, carbs: 45, fat: 0.4 });
     const chicken = repo.createFood({ name: 'Chicken', brand: null, servingQty: 4, servingUnit: 'oz', calories: 180, protein: 34, carbs: 0, fat: 4 });

@@ -11,11 +11,12 @@
     "forceConsistentCasingInFileNames": true,
     "module": "ESNext",
     "moduleResolution": "Bundler",
+    "allowImportingTsExtensions": true,
     "resolveJsonModule": true,
     "isolatedModules": true,
     "noEmit": true,
     "jsx": "react-jsx",
     "types": ["node", "vitest/globals"]
   },
-  "include": ["src", "server", "shared", "tests", "vite.config.ts", "playwright.config.ts"]
+  "include": ["src", "server", "shared", "tests", "vite.config.ts"]
 }

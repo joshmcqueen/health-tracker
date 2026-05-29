@@ -16,9 +16,11 @@ The app is built for one personal user and does not include authentication.
 ## Features
 
 - Add, edit, and delete weight logs
-- Create foods from nutrition facts labels
-- Scale calories/macros by serving quantity when logging food
-- Group foods into reusable meals for faster daily logging
+- Use the Food screen as a focused daily diary for the selected date
+- Add, edit, and delete saved foods on a dedicated Foods screen
+- Create foods from nutrition facts labels and scale calories/macros by serving quantity
+- Create, edit, and delete reusable meals on a dedicated Meals screen
+- Log saved foods or meals into the current day
 - Track configurable calorie, protein, carb, and fat goals
 - View charts for weight, calories, and macros over time
 - Store all data locally in SQLite
@@ -73,7 +75,6 @@ pnpm build     # Type-check and build the frontend/backend
 pnpm start     # Run the built production server
 pnpm seed      # Add sample data to SQLite
 pnpm test      # Run backend behavior tests
-pnpm test:ui   # Run Playwright mobile smoke tests
 ```
 
 ## Project Layout
@@ -82,7 +83,7 @@ pnpm test:ui   # Run Playwright mobile smoke tests
 src/       React app and mobile UI
 server/    Express API, SQLite setup, repository, seed script
 shared/    Shared TypeScript types
-tests/     Backend and Playwright tests
+tests/     Backend behavior tests
 data/      Local SQLite database, ignored by git
 ```
 
@@ -90,5 +91,7 @@ data/      Local SQLite database, ignored by git
 
 - Weight defaults to pounds.
 - Nutrition is stored per labeled serving.
+- The Food screen only shows the selected day's totals, quick log controls, and logged entries.
+- Saved food and meal management live on separate screens to keep daily logging simple.
 - Logged food and meals are saved as nutrition snapshots so older logs remain stable if a food or meal changes later.
 - External nutrition APIs and barcode scanning are not included in this first version.
