@@ -49,7 +49,7 @@ http://localhost:5173
 The API runs on:
 
 ```text
-http://localhost:3001
+http://localhost:3000
 ```
 
 ## Docker / Dokploy
@@ -58,13 +58,13 @@ Build and run the production container locally:
 
 ```bash
 docker build -t health-tracker .
-docker run --rm -p 3001:3001 -v health-tracker-data:/app/data health-tracker
+docker run --rm -p 3000:3000 -v health-tracker-data:/app/data health-tracker
 ```
 
 Open:
 
 ```text
-http://localhost:3001
+http://localhost:3000
 ```
 
 For Dokploy, create an app from this repository using the included `Dockerfile`.
@@ -72,9 +72,9 @@ For Dokploy, create an app from this repository using the included `Dockerfile`.
 Recommended settings:
 
 ```text
-Port: 3001
+Port: 3000
 Environment:
-  PORT=3001
+  PORT=3000
   DATABASE_URL=/app/data/health-tracker.sqlite
 Persistent volume:
   /app/data

@@ -4,7 +4,7 @@ import express from 'express';
 import { createApp } from './app';
 import { createDatabase } from './db';
 
-const port = Number(process.env.PORT || 3001);
+const port = Number(process.env.PORT || 3000);
 const db = createDatabase();
 const app = createApp(db);
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
