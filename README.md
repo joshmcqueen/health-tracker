@@ -52,6 +52,38 @@ The API runs on:
 http://localhost:3001
 ```
 
+## Docker / Dokploy
+
+Build and run the production container locally:
+
+```bash
+docker build -t health-tracker .
+docker run --rm -p 3001:3001 -v health-tracker-data:/app/data health-tracker
+```
+
+Open:
+
+```text
+http://localhost:3001
+```
+
+For Dokploy, create an app from this repository using the included `Dockerfile`.
+
+Recommended settings:
+
+```text
+Port: 3001
+Environment:
+  PORT=3001
+  DATABASE_URL=/app/data/health-tracker.sqlite
+Persistent volume:
+  /app/data
+Health check path:
+  /api/health
+```
+
+The container serves both the React app and the API from the same port. Keep `/app/data` mounted as a persistent volume so the SQLite database survives redeploys.
+
 ## Database
 
 The SQLite database is created automatically at:

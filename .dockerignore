@@ -1,0 +1,11 @@
+.git
+.pnpm-store
+data
+dist
+node_modules
+test-results
+
+.DS_Store
+*.log
+npm-debug.log*
+pnpm-debug.log*
