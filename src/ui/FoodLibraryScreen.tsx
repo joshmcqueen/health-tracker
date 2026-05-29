@@ -3,7 +3,7 @@ import { Pencil, Plus, Trash2, X } from 'lucide-react';
 import { FormEvent, useState } from 'react';
 import { api } from '../api';
 import type { Food } from '../../shared/types';
-import { Field, Header } from './components';
+import { Field, Header, useToast } from './components';
 
 type FoodForm = Omit<Food, 'id' | 'createdAt'>;
 
@@ -19,6 +19,7 @@ const emptyFood: FoodForm = {
 
 export function FoodLibraryScreen() {
   const queryClient = useQueryClient();
+  const { showToast } = useToast();
   const [foodForm, setFoodForm] = useState<FoodForm>(emptyFood);
   const [editingFoodId, setEditingFoodId] = useState<number | null>(null);
 
@@ -35,6 +36,7 @@ export function FoodLibraryScreen() {
     mutationFn: api.createFood,
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['foods'] });
+      showToast('Food saved');
       setFoodForm(emptyFood);
     }
   });
@@ -43,6 +45,7 @@ export function FoodLibraryScreen() {
     mutationFn: ({ id, body }: { id: number; body: FoodForm }) => api.updateFood(id, body),
     onSuccess: () => {
       invalidateFoodData();
+      showToast('Food updated');
       setFoodForm(emptyFood);
       setEditingFoodId(null);
     }
@@ -52,6 +55,7 @@ export function FoodLibraryScreen() {
     mutationFn: api.deleteFood,
     onSuccess: (_data, deletedId) => {
       invalidateFoodData();
+      showToast('Food deleted');
       if (editingFoodId === deletedId) {
         setFoodForm(emptyFood);
         setEditingFoodId(null);

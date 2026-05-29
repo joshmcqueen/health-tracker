@@ -22,7 +22,8 @@ The app is built for one personal user and does not include authentication.
 - Create, edit, and delete reusable meals on a dedicated Meals screen
 - Log saved foods or meals into the current day
 - Track configurable calorie, protein, carb, and fat goals
-- View charts for weight, calories, and macros over time
+- View charts for weight, calories, and macros over time, defaulting to the last 7 days
+- See toast confirmations after successful saves, deletes, and logged entries
 - Store all data locally in SQLite
 
 ## Getting Started
@@ -93,5 +94,7 @@ data/      Local SQLite database, ignored by git
 - Nutrition is stored per labeled serving.
 - The Food screen only shows the selected day's totals, quick log controls, and logged entries.
 - Saved food and meal management live on separate screens to keep daily logging simple.
+- Page headers avoid repeated app branding to preserve vertical space on mobile.
+- Mutating actions show short toast confirmations so users can tell an action completed.
 - Logged food and meals are saved as nutrition snapshots so older logs remain stable if a food or meal changes later.
 - External nutrition APIs and barcode scanning are not included in this first version.

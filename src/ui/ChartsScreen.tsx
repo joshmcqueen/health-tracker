@@ -5,12 +5,12 @@ import { Area, AreaChart, CartesianGrid, Legend, Line, LineChart, ResponsiveCont
 import { api } from '../api';
 import { daysAgo, shortDate, today } from '../date';
 import type { Settings } from '../../shared/types';
-import { Field, Header } from './components';
+import { Field, Header, useToast } from './components';
 
 type RangePreset = '7d' | '1m' | '1q' | 'advanced';
 
 const rangePresets: Array<{ id: RangePreset; label: string; days?: number }> = [
-  { id: '7d', label: 'Last 7 days', days: 6 },
+  { id: '7d', label: 'Last week', days: 6 },
   { id: '1m', label: 'Last month', days: 30 },
   { id: '1q', label: 'Last quarter', days: 90 },
   { id: 'advanced', label: 'Advanced' }
@@ -18,9 +18,10 @@ const rangePresets: Array<{ id: RangePreset; label: string; days?: number }> = [
 
 export function ChartsScreen() {
   const queryClient = useQueryClient();
-  const [from, setFrom] = useState(daysAgo(30));
+  const { showToast } = useToast();
+  const [from, setFrom] = useState(daysAgo(6));
   const [to, setTo] = useState(today());
-  const [rangePreset, setRangePreset] = useState<RangePreset>('1m');
+  const [rangePreset, setRangePreset] = useState<RangePreset>('7d');
   const { data: points = [] } = useQuery({ queryKey: ['charts', from, to], queryFn: () => api.charts(from, to) });
   const { data: settings } = useQuery({ queryKey: ['settings'], queryFn: api.settings });
   const [settingsForm, setSettingsForm] = useState<Settings | null>(null);
@@ -32,6 +33,7 @@ export function ChartsScreen() {
       setSettingsForm(updated);
       queryClient.invalidateQueries({ queryKey: ['settings'] });
       queryClient.invalidateQueries({ queryKey: ['summary'] });
+      showToast('Goals saved');
     }
   });
 

@@ -4,10 +4,11 @@ import { FormEvent, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { api } from '../api';
 import { today } from '../date';
-import { Field, Header, MacroBar, MacroPills } from './components';
+import { Field, Header, MacroBar, MacroPills, useToast } from './components';
 
 export function FoodScreen() {
   const queryClient = useQueryClient();
+  const { showToast } = useToast();
   const [date, setDate] = useState(today());
   const [quickFoodId, setQuickFoodId] = useState('');
   const [quickMealId, setQuickMealId] = useState('');
@@ -27,12 +28,18 @@ export function FoodScreen() {
 
   const logFood = useMutation({
     mutationFn: api.logFood,
-    onSuccess: invalidateFoodDay
+    onSuccess: () => {
+      invalidateFoodDay();
+      showToast('Food logged');
+    }
   });
 
   const deleteLog = useMutation({
     mutationFn: api.deleteFoodLog,
-    onSuccess: invalidateFoodDay
+    onSuccess: () => {
+      invalidateFoodDay();
+      showToast('Food log deleted');
+    }
   });
 
   const submitLog = (event: FormEvent) => {

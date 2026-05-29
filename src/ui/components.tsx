@@ -1,11 +1,59 @@
 import type { MacroTotals } from '../../shared/types';
+import { CheckCircle2 } from 'lucide-react';
+import { createContext, useContext, useMemo, useRef, useState } from 'react';
 import type { ReactNode } from 'react';
+
+type Toast = {
+  id: number;
+  message: string;
+};
+
+type ToastContextValue = {
+  showToast: (message: string) => void;
+};
+
+const ToastContext = createContext<ToastContextValue | null>(null);
+
+export function ToastProvider({ children }: { children: ReactNode }) {
+  const [toasts, setToasts] = useState<Toast[]>([]);
+  const nextToastId = useRef(0);
+
+  const value = useMemo<ToastContextValue>(() => ({
+    showToast: (message: string) => {
+      nextToastId.current += 1;
+      const id = nextToastId.current;
+      setToasts((current) => [...current, { id, message }]);
+      window.setTimeout(() => {
+        setToasts((current) => current.filter((toast) => toast.id !== id));
+      }, 3200);
+    }
+  }), []);
+
+  return (
+    <ToastContext.Provider value={value}>
+      {children}
+      <div className="toast-region" aria-live="polite" aria-atomic="true">
+        {toasts.map((toast) => (
+          <div className="toast" key={toast.id} role="status">
+            <CheckCircle2 size={18} />
+            <span>{toast.message}</span>
+          </div>
+        ))}
+      </div>
+    </ToastContext.Provider>
+  );
+}
+
+export function useToast() {
+  const context = useContext(ToastContext);
+  if (!context) throw new Error('useToast must be used within ToastProvider');
+  return context;
+}
 
 export function Header({ title, subtitle }: { title: string; subtitle?: string }) {
   return (
     <header className="header">
       <div>
-        <p className="eyebrow">Health Tracker</p>
         <h1>{title}</h1>
         {subtitle ? <p>{subtitle}</p> : null}
       </div>

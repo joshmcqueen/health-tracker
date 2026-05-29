@@ -3,10 +3,11 @@ import { Pencil, Plus, Trash2, X } from 'lucide-react';
 import { FormEvent, useMemo, useState } from 'react';
 import { api } from '../api';
 import type { Meal } from '../../shared/types';
-import { Field, Header, MacroPills } from './components';
+import { Field, Header, MacroPills, useToast } from './components';
 
 export function MealLibraryScreen() {
   const queryClient = useQueryClient();
+  const { showToast } = useToast();
   const [mealName, setMealName] = useState('');
   const [mealItems, setMealItems] = useState<Array<{ foodId: number; quantity: number }>>([]);
   const [editingMealId, setEditingMealId] = useState<number | null>(null);
@@ -32,6 +33,7 @@ export function MealLibraryScreen() {
     mutationFn: api.createMeal,
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['meals'] });
+      showToast('Meal saved');
       resetMealForm();
     }
   });
@@ -40,6 +42,7 @@ export function MealLibraryScreen() {
     mutationFn: ({ id, body }: { id: number; body: { name: string; items: Array<{ foodId: number; quantity: number }> } }) => api.updateMeal(id, body),
     onSuccess: () => {
       invalidateMealData();
+      showToast('Meal updated');
       resetMealForm();
     }
   });
@@ -48,6 +51,7 @@ export function MealLibraryScreen() {
     mutationFn: api.deleteMeal,
     onSuccess: (_data, deletedId) => {
       invalidateMealData();
+      showToast('Meal deleted');
       if (editingMealId === deletedId) resetMealForm();
     }
   });

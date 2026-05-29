@@ -4,7 +4,7 @@ import { FormEvent, useState } from 'react';
 import { api } from '../api';
 import { readableDate, today } from '../date';
 import type { WeightLog } from '../../shared/types';
-import { Field, Header } from './components';
+import { Field, Header, useToast } from './components';
 
 type WeightForm = Pick<WeightLog, 'date' | 'weight' | 'note'>;
 
@@ -12,6 +12,7 @@ const blankForm = (): WeightForm => ({ date: today(), weight: 0, note: null });
 
 export function WeightScreen() {
   const queryClient = useQueryClient();
+  const { showToast } = useToast();
   const { data: logs = [] } = useQuery({ queryKey: ['weight-logs'], queryFn: api.weightLogs });
   const { data: settings } = useQuery({ queryKey: ['settings'], queryFn: api.settings });
   const [editingId, setEditingId] = useState<number | null>(null);
@@ -22,6 +23,7 @@ export function WeightScreen() {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['weight-logs'] });
       queryClient.invalidateQueries({ queryKey: ['charts'] });
+      showToast(editingId ? 'Weigh-in updated' : 'Weigh-in added');
       setEditingId(null);
       setForm(blankForm());
     }
@@ -32,6 +34,7 @@ export function WeightScreen() {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['weight-logs'] });
       queryClient.invalidateQueries({ queryKey: ['charts'] });
+      showToast('Weigh-in deleted');
     }
   });
 
