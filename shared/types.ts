@@ -24,7 +24,6 @@ export type WeightLog = {
 export type Food = {
   id: number;
   name: string;
-  brand: string | null;
   servingQty: number;
   servingUnit: string;
   calories: number;

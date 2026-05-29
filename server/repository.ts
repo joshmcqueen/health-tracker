@@ -12,7 +12,6 @@ type DbSettings = {
 type DbFood = {
   id: number;
   name: string;
-  brand: string | null;
   serving_qty: number;
   serving_unit: string;
   calories: number;
@@ -53,7 +52,6 @@ function mapFood(row: DbFood): Food {
   return {
     id: row.id,
     name: row.name,
-    brand: row.brand,
     servingQty: row.serving_qty,
     servingUnit: row.serving_unit,
     calories: row.calories,
@@ -174,7 +172,7 @@ export function createRepository(db: AppDatabase) {
     if (input.foodId) {
       const food = getFood(input.foodId);
       if (!food) return null;
-      label = food.brand ? `${food.name} (${food.brand})` : food.name;
+      label = food.name;
       addTotals(totals, food, input.quantity);
     } else if (input.mealId) {
       const meal = getMeal(input.mealId);
@@ -260,17 +258,17 @@ export function createRepository(db: AppDatabase) {
     listFoods: () => (db.prepare('SELECT * FROM foods ORDER BY name').all() as DbFood[]).map(mapFood),
     createFood: (input: Omit<Food, 'id' | 'createdAt'>) => {
       const result = db.prepare(`
-        INSERT INTO foods (name, brand, serving_qty, serving_unit, calories, protein, carbs, fat)
-        VALUES (?, ?, ?, ?, ?, ?, ?, ?)
-      `).run(input.name, input.brand, input.servingQty, input.servingUnit, input.calories, input.protein, input.carbs, input.fat);
+        INSERT INTO foods (name, serving_qty, serving_unit, calories, protein, carbs, fat)
+        VALUES (?, ?, ?, ?, ?, ?, ?)
+      `).run(input.name, input.servingQty, input.servingUnit, input.calories, input.protein, input.carbs, input.fat);
       return getFood(Number(result.lastInsertRowid))!;
     },
     updateFood: (id: number, input: Omit<Food, 'id' | 'createdAt'>) => {
       db.prepare(`
         UPDATE foods
-        SET name = ?, brand = ?, serving_qty = ?, serving_unit = ?, calories = ?, protein = ?, carbs = ?, fat = ?
+        SET name = ?, serving_qty = ?, serving_unit = ?, calories = ?, protein = ?, carbs = ?, fat = ?
         WHERE id = ?
-      `).run(input.name, input.brand, input.servingQty, input.servingUnit, input.calories, input.protein, input.carbs, input.fat, id);
+      `).run(input.name, input.servingQty, input.servingUnit, input.calories, input.protein, input.carbs, input.fat, id);
       return getFood(id);
     },
     deleteFood: (id: number) => db.prepare('DELETE FROM foods WHERE id = ?').run(id).changes,

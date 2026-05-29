@@ -21,7 +21,6 @@ export const weightLogSchema = z.object({
 
 export const foodSchema = z.object({
   name: z.string().trim().min(1),
-  brand: optionalText,
   servingQty: positiveNumber,
   servingUnit: z.string().trim().min(1),
   calories: nonNegativeNumber,

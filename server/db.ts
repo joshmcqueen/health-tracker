@@ -43,7 +43,6 @@ export function migrate(db: AppDatabase) {
     CREATE TABLE IF NOT EXISTS foods (
       id INTEGER PRIMARY KEY AUTOINCREMENT,
       name TEXT NOT NULL,
-      brand TEXT,
       serving_qty REAL NOT NULL,
       serving_unit TEXT NOT NULL,
       calories REAL NOT NULL,
@@ -83,4 +82,9 @@ export function migrate(db: AppDatabase) {
     CREATE INDEX IF NOT EXISTS idx_food_logs_date ON food_logs(date);
     CREATE INDEX IF NOT EXISTS idx_weight_logs_date ON weight_logs(date);
   `);
+
+  const foodColumns = db.prepare('PRAGMA table_info(foods)').all() as Array<{ name: string }>;
+  if (foodColumns.some((column) => column.name === 'brand')) {
+    db.exec('ALTER TABLE foods DROP COLUMN brand');
+  }
 }

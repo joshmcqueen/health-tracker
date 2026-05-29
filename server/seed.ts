@@ -12,7 +12,7 @@ const isoDate = (daysAgo: number) => {
 };
 
 function upsertFood(input: Parameters<typeof repo.createFood>[0]) {
-  const existing = repo.listFoods().find((food) => food.name === input.name && food.brand === input.brand);
+  const existing = repo.listFoods().find((food) => food.name === input.name);
   return existing ?? repo.createFood(input);
 }
 
@@ -36,16 +36,16 @@ repo.updateSettings({
   weightUnit: 'lb'
 });
 
-const oats = upsertFood({ name: 'Oatmeal', brand: 'Kitchen', servingQty: 1, servingUnit: 'bowl', calories: 300, protein: 12, carbs: 48, fat: 6 });
-const yogurt = upsertFood({ name: 'Greek Yogurt', brand: 'Fage', servingQty: 170, servingUnit: 'g', calories: 100, protein: 18, carbs: 6, fat: 0 });
-const berries = upsertFood({ name: 'Blueberries', brand: null, servingQty: 1, servingUnit: 'cup', calories: 84, protein: 1, carbs: 21, fat: 0.5 });
-const chicken = upsertFood({ name: 'Chicken Breast', brand: null, servingQty: 4, servingUnit: 'oz', calories: 185, protein: 35, carbs: 0, fat: 4 });
-const rice = upsertFood({ name: 'Jasmine Rice', brand: null, servingQty: 1, servingUnit: 'cup', calories: 205, protein: 4, carbs: 45, fat: 0.4 });
-const broccoli = upsertFood({ name: 'Broccoli', brand: null, servingQty: 1, servingUnit: 'cup', calories: 55, protein: 4, carbs: 11, fat: 0.6 });
-const salmon = upsertFood({ name: 'Salmon Filet', brand: null, servingQty: 5, servingUnit: 'oz', calories: 295, protein: 34, carbs: 0, fat: 17 });
-const potato = upsertFood({ name: 'Sweet Potato', brand: null, servingQty: 1, servingUnit: 'medium', calories: 112, protein: 2, carbs: 26, fat: 0 });
-const eggs = upsertFood({ name: 'Eggs', brand: null, servingQty: 2, servingUnit: 'eggs', calories: 140, protein: 12, carbs: 1, fat: 10 });
-const shake = upsertFood({ name: 'Protein Shake', brand: 'Post-workout', servingQty: 1, servingUnit: 'shake', calories: 180, protein: 30, carbs: 8, fat: 3 });
+const oats = upsertFood({ name: 'Kitchen Oatmeal', servingQty: 1, servingUnit: 'bowl', calories: 300, protein: 12, carbs: 48, fat: 6 });
+const yogurt = upsertFood({ name: 'Fage Greek Yogurt', servingQty: 170, servingUnit: 'g', calories: 100, protein: 18, carbs: 6, fat: 0 });
+const berries = upsertFood({ name: 'Blueberries', servingQty: 1, servingUnit: 'cup', calories: 84, protein: 1, carbs: 21, fat: 0.5 });
+const chicken = upsertFood({ name: 'Chicken Breast', servingQty: 4, servingUnit: 'oz', calories: 185, protein: 35, carbs: 0, fat: 4 });
+const rice = upsertFood({ name: 'Jasmine Rice', servingQty: 1, servingUnit: 'cup', calories: 205, protein: 4, carbs: 45, fat: 0.4 });
+const broccoli = upsertFood({ name: 'Broccoli', servingQty: 1, servingUnit: 'cup', calories: 55, protein: 4, carbs: 11, fat: 0.6 });
+const salmon = upsertFood({ name: 'Salmon Filet', servingQty: 5, servingUnit: 'oz', calories: 295, protein: 34, carbs: 0, fat: 17 });
+const potato = upsertFood({ name: 'Sweet Potato', servingQty: 1, servingUnit: 'medium', calories: 112, protein: 2, carbs: 26, fat: 0 });
+const eggs = upsertFood({ name: 'Eggs', servingQty: 2, servingUnit: 'eggs', calories: 140, protein: 12, carbs: 1, fat: 10 });
+const shake = upsertFood({ name: 'Post-workout Protein Shake', servingQty: 1, servingUnit: 'shake', calories: 180, protein: 30, carbs: 8, fat: 3 });
 
 const breakfast = recreateMeal('Usual Breakfast', [
   { foodId: oats.id, quantity: 1 },

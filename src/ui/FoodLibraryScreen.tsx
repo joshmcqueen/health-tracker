@@ -9,7 +9,6 @@ type FoodForm = Omit<Food, 'id' | 'createdAt'>;
 
 const emptyFood: FoodForm = {
   name: '',
-  brand: null,
   servingQty: 1,
   servingUnit: 'serving',
   calories: 0,
@@ -73,7 +72,6 @@ export function FoodLibraryScreen() {
     setEditingFoodId(food.id);
     setFoodForm({
       name: food.name,
-      brand: food.brand,
       servingQty: food.servingQty,
       servingUnit: food.servingUnit,
       calories: food.calories,
@@ -102,7 +100,6 @@ export function FoodLibraryScreen() {
           ) : null}
         </div>
         <Field label="Name"><input value={foodForm.name} onChange={(event) => setFoodForm({ ...foodForm, name: event.target.value })} required /></Field>
-        <Field label="Brand"><input value={foodForm.brand ?? ''} onChange={(event) => setFoodForm({ ...foodForm, brand: event.target.value || null })} /></Field>
         <div className="two-col">
           <Field label="Serving amount"><input type="number" step="0.1" min="0.01" value={foodForm.servingQty} onChange={(event) => setFoodForm({ ...foodForm, servingQty: Number(event.target.value) })} /></Field>
           <Field label="Unit"><input value={foodForm.servingUnit} onChange={(event) => setFoodForm({ ...foodForm, servingUnit: event.target.value })} /></Field>
