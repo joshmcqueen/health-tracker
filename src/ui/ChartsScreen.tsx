@@ -7,10 +7,20 @@ import { daysAgo, shortDate, today } from '../date';
 import type { Settings } from '../../shared/types';
 import { Field, Header } from './components';
 
+type RangePreset = '7d' | '1m' | '1q' | 'advanced';
+
+const rangePresets: Array<{ id: RangePreset; label: string; days?: number }> = [
+  { id: '7d', label: 'Last 7 days', days: 6 },
+  { id: '1m', label: 'Last month', days: 30 },
+  { id: '1q', label: 'Last quarter', days: 90 },
+  { id: 'advanced', label: 'Advanced' }
+];
+
 export function ChartsScreen() {
   const queryClient = useQueryClient();
   const [from, setFrom] = useState(daysAgo(30));
   const [to, setTo] = useState(today());
+  const [rangePreset, setRangePreset] = useState<RangePreset>('1m');
   const { data: points = [] } = useQuery({ queryKey: ['charts', from, to], queryFn: () => api.charts(from, to) });
   const { data: settings } = useQuery({ queryKey: ['settings'], queryFn: api.settings });
   const [settingsForm, setSettingsForm] = useState<Settings | null>(null);
@@ -31,14 +41,60 @@ export function ChartsScreen() {
   };
 
   const chartData = points.map((point) => ({ ...point, label: shortDate(point.date) }));
+  const showAdvancedDates = rangePreset === 'advanced';
+
+  const selectPreset = (preset: RangePreset) => {
+    setRangePreset(preset);
+    const range = rangePresets.find((item) => item.id === preset);
+    if (!range?.days) return;
+    setFrom(daysAgo(range.days));
+    setTo(today());
+  };
+
+  const updateCustomRange = (field: 'from' | 'to', value: string) => {
+    setRangePreset('advanced');
+    if (field === 'from') setFrom(value);
+    if (field === 'to') setTo(value);
+  };
 
   return (
     <>
       <Header title="Charts" subtitle="Watch your trends without the spreadsheet ritual." />
 
       <section className="panel date-range">
-        <Field label="From"><input type="date" value={from} onChange={(event) => setFrom(event.target.value)} /></Field>
-        <Field label="To"><input type="date" value={to} onChange={(event) => setTo(event.target.value)} /></Field>
+        <div className="range-preset-group" aria-label="Chart date range">
+          {rangePresets.map((preset) => (
+            <button
+              key={preset.id}
+              type="button"
+              className="range-preset-button"
+              aria-pressed={rangePreset === preset.id}
+              onClick={() => selectPreset(preset.id)}
+            >
+              {preset.label}
+            </button>
+          ))}
+        </div>
+        {showAdvancedDates ? (
+          <div className="advanced-date-range">
+            <Field label="From">
+              <input
+                type="date"
+                value={from}
+                onInput={(event) => updateCustomRange('from', event.currentTarget.value)}
+                onChange={(event) => updateCustomRange('from', event.target.value)}
+              />
+            </Field>
+            <Field label="To">
+              <input
+                type="date"
+                value={to}
+                onInput={(event) => updateCustomRange('to', event.currentTarget.value)}
+                onChange={(event) => updateCustomRange('to', event.target.value)}
+              />
+            </Field>
+          </div>
+        ) : null}
       </section>
 
       <section className="panel chart-panel">
