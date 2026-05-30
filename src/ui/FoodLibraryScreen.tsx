@@ -3,7 +3,7 @@ import { Pencil, Plus, Sparkles, Trash2, X } from 'lucide-react';
 import { FormEvent, useState } from 'react';
 import { api } from '../api';
 import type { Food } from '../../shared/types';
-import { Field, Header, useToast } from './components';
+import { Field, Header, NumberInput, useToast } from './components';
 
 type FoodForm = Omit<Food, 'id' | 'createdAt'>;
 
@@ -86,10 +86,14 @@ export function FoodLibraryScreen() {
 
   const submitFood = (event: FormEvent) => {
     event.preventDefault();
+    const body = {
+      ...foodForm,
+      servingUnit: foodForm.servingUnit.trim() || emptyFood.servingUnit
+    };
     if (editingFoodId) {
-      updateFood.mutate({ id: editingFoodId, body: foodForm });
+      updateFood.mutate({ id: editingFoodId, body });
     } else {
-      createFood.mutate(foodForm);
+      createFood.mutate(body);
     }
   };
 
@@ -148,14 +152,21 @@ export function FoodLibraryScreen() {
         </div>
         <Field label="Name"><input value={foodForm.name} onChange={(event) => setFoodForm({ ...foodForm, name: event.target.value })} required /></Field>
         <div className="two-col">
-          <Field label="Serving amount"><input type="number" step="0.1" min="0.01" value={foodForm.servingQty} onChange={(event) => setFoodForm({ ...foodForm, servingQty: Number(event.target.value) })} /></Field>
-          <Field label="Unit"><input value={foodForm.servingUnit} onChange={(event) => setFoodForm({ ...foodForm, servingUnit: event.target.value })} /></Field>
+          <Field label="Serving amount"><NumberInput inputMode="decimal" step="any" min="0.01" value={foodForm.servingQty} onValueChange={(servingQty) => setFoodForm({ ...foodForm, servingQty })} /></Field>
+          <Field label="Unit">
+            <input
+              value={foodForm.servingUnit}
+              onFocus={() => setFoodForm({ ...foodForm, servingUnit: '' })}
+              onBlur={() => setFoodForm((current) => ({ ...current, servingUnit: current.servingUnit.trim() || emptyFood.servingUnit }))}
+              onChange={(event) => setFoodForm({ ...foodForm, servingUnit: event.target.value })}
+            />
+          </Field>
         </div>
         <div className="two-col">
-          <Field label="Calories"><input type="number" min="0" value={foodForm.calories} onChange={(event) => setFoodForm({ ...foodForm, calories: Number(event.target.value) })} /></Field>
-          <Field label="Protein"><input type="number" min="0" value={foodForm.protein} onChange={(event) => setFoodForm({ ...foodForm, protein: Number(event.target.value) })} /></Field>
-          <Field label="Carbs"><input type="number" min="0" value={foodForm.carbs} onChange={(event) => setFoodForm({ ...foodForm, carbs: Number(event.target.value) })} /></Field>
-          <Field label="Fat"><input type="number" min="0" value={foodForm.fat} onChange={(event) => setFoodForm({ ...foodForm, fat: Number(event.target.value) })} /></Field>
+          <Field label="Calories"><NumberInput inputMode="decimal" min="0" value={foodForm.calories} emptyWhenZero onValueChange={(calories) => setFoodForm({ ...foodForm, calories })} /></Field>
+          <Field label="Protein"><NumberInput inputMode="decimal" min="0" value={foodForm.protein} emptyWhenZero onValueChange={(protein) => setFoodForm({ ...foodForm, protein })} /></Field>
+          <Field label="Carbs"><NumberInput inputMode="decimal" min="0" value={foodForm.carbs} emptyWhenZero onValueChange={(carbs) => setFoodForm({ ...foodForm, carbs })} /></Field>
+          <Field label="Fat"><NumberInput inputMode="decimal" min="0" value={foodForm.fat} emptyWhenZero onValueChange={(fat) => setFoodForm({ ...foodForm, fat })} /></Field>
         </div>
         <button className="primary-button" type="submit">
           {editingFoodId ? <Pencil size={18} /> : <Plus size={18} />}

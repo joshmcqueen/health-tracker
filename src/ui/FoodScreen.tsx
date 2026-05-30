@@ -4,7 +4,7 @@ import { ChangeEvent, FormEvent, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { api } from '../api';
 import { today } from '../date';
-import { Field, Header, MacroBar, MacroPills, useToast } from './components';
+import { Field, Header, MacroBar, MacroPills, NumberInput, useToast } from './components';
 import type { DirectFoodLogInput } from '../../shared/types';
 
 type AiLogDraft = Omit<DirectFoodLogInput, 'date'> & {
@@ -163,7 +163,7 @@ export function FoodScreen() {
           </select>
         </Field>
         <Field label="Servings">
-          <input type="number" inputMode="decimal" step="0.25" min="0.01" value={quantity} onChange={(event) => setQuantity(Number(event.target.value))} />
+          <NumberInput inputMode="decimal" step="any" min="0.01" value={quantity} onValueChange={setQuantity} />
         </Field>
         <button className="primary-button" type="submit" disabled={!quickFoodId && !quickMealId}>
           <Utensils size={18} />
@@ -204,12 +204,12 @@ export function FoodScreen() {
               <p>{aiDraft.confidence} confidence · {aiDraft.note}</p>
             </div>
             <Field label="Label"><input value={aiDraft.label} onChange={(event) => updateAiDraft({ label: event.target.value })} required /></Field>
-            <Field label="Servings"><input type="number" inputMode="decimal" step="0.25" min="0.01" value={aiDraft.quantity} onChange={(event) => updateAiDraft({ quantity: Number(event.target.value) })} /></Field>
+            <Field label="Servings"><NumberInput inputMode="decimal" step="any" min="0.01" value={aiDraft.quantity} onValueChange={(quantity) => updateAiDraft({ quantity })} /></Field>
             <div className="two-col">
-              <Field label="Calories"><input type="number" min="0" value={aiDraft.calories} onChange={(event) => updateAiDraft({ calories: Number(event.target.value) })} /></Field>
-              <Field label="Protein"><input type="number" min="0" value={aiDraft.protein} onChange={(event) => updateAiDraft({ protein: Number(event.target.value) })} /></Field>
-              <Field label="Carbs"><input type="number" min="0" value={aiDraft.carbs} onChange={(event) => updateAiDraft({ carbs: Number(event.target.value) })} /></Field>
-              <Field label="Fat"><input type="number" min="0" value={aiDraft.fat} onChange={(event) => updateAiDraft({ fat: Number(event.target.value) })} /></Field>
+              <Field label="Calories"><NumberInput inputMode="decimal" min="0" value={aiDraft.calories} emptyWhenZero onValueChange={(calories) => updateAiDraft({ calories })} /></Field>
+              <Field label="Protein"><NumberInput inputMode="decimal" min="0" value={aiDraft.protein} emptyWhenZero onValueChange={(protein) => updateAiDraft({ protein })} /></Field>
+              <Field label="Carbs"><NumberInput inputMode="decimal" min="0" value={aiDraft.carbs} emptyWhenZero onValueChange={(carbs) => updateAiDraft({ carbs })} /></Field>
+              <Field label="Fat"><NumberInput inputMode="decimal" min="0" value={aiDraft.fat} emptyWhenZero onValueChange={(fat) => updateAiDraft({ fat })} /></Field>
             </div>
             <button className="primary-button" type="submit" disabled={logDirectFood.isPending}>
               <Utensils size={18} />

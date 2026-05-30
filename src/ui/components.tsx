@@ -1,7 +1,7 @@
 import type { MacroTotals } from '../../shared/types';
 import { CheckCircle2 } from 'lucide-react';
-import { createContext, useContext, useMemo, useRef, useState } from 'react';
-import type { ReactNode } from 'react';
+import { createContext, useContext, useEffect, useMemo, useRef, useState } from 'react';
+import type { InputHTMLAttributes, ReactNode } from 'react';
 
 type Toast = {
   id: number;
@@ -67,6 +67,56 @@ export function Field({ label, children }: { label: string; children: ReactNode 
       <span>{label}</span>
       {children}
     </label>
+  );
+}
+
+type NumberInputProps = Omit<InputHTMLAttributes<HTMLInputElement>, 'type' | 'value' | 'onChange'> & {
+  value: number;
+  onValueChange: (value: number) => void;
+  emptyWhenZero?: boolean;
+};
+
+export function NumberInput({ value, onValueChange, emptyWhenZero = false, onBlur, step = 'any', ...props }: NumberInputProps) {
+  const inputRef = useRef<HTMLInputElement>(null);
+  const toText = (nextValue: number) => emptyWhenZero && nextValue === 0 ? '' : String(nextValue);
+  const [text, setText] = useState(toText(value));
+
+  useEffect(() => {
+    if (document.activeElement !== inputRef.current) {
+      setText(toText(value));
+    }
+  }, [emptyWhenZero, value]);
+
+  return (
+    <input
+      {...props}
+      ref={inputRef}
+      type="number"
+      step={step}
+      value={text}
+      onChange={(event) => {
+        const nextText = event.target.value;
+        setText(nextText);
+        const nextValue = Number(nextText);
+        if (nextText !== '' && !Number.isNaN(nextValue)) {
+          onValueChange(nextValue);
+        }
+      }}
+      onBlur={(event) => {
+        if (text === '') {
+          setText(toText(value));
+        } else {
+          const nextValue = Number(text);
+          if (Number.isNaN(nextValue)) {
+            setText(toText(value));
+          } else {
+            onValueChange(nextValue);
+            setText(toText(nextValue));
+          }
+        }
+        onBlur?.(event);
+      }}
+    />
   );
 }
 
