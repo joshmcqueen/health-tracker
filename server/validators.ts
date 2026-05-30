@@ -4,6 +4,9 @@ const dateString = z.string().regex(/^\d{4}-\d{2}-\d{2}$/);
 const positiveNumber = z.coerce.number().positive();
 const nonNegativeNumber = z.coerce.number().min(0);
 const optionalText = z.string().trim().optional().nullable().transform((value) => value || null);
+const imageDataUrl = z.string()
+  .max(6_500_000)
+  .regex(/^data:image\/(png|jpeg|jpg|webp);base64,[A-Za-z0-9+/=\s]+$/);
 
 export const settingsSchema = z.object({
   calorieGoal: positiveNumber,
@@ -46,6 +49,16 @@ export const foodLogSchema = z.object({
   message: 'Provide exactly one of foodId or mealId'
 });
 
+export const directFoodLogSchema = z.object({
+  date: dateString,
+  label: z.string().trim().min(1),
+  quantity: positiveNumber.default(1),
+  calories: nonNegativeNumber,
+  protein: nonNegativeNumber,
+  carbs: nonNegativeNumber,
+  fat: nonNegativeNumber
+});
+
 export const foodLogUpdateSchema = z.object({
   date: dateString,
   quantity: positiveNumber
@@ -54,4 +67,14 @@ export const foodLogUpdateSchema = z.object({
 export const rangeSchema = z.object({
   from: dateString,
   to: dateString
+});
+
+export const aiNutritionEstimateSchema = z.object({
+  target: z.enum(['food', 'log']),
+  text: z.string().trim().max(2000).optional(),
+  image: z.object({
+    dataUrl: imageDataUrl
+  }).optional()
+}).refine((value) => Boolean(value.text) || Boolean(value.image), {
+  message: 'Provide text, an image, or both'
 });

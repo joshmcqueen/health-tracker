@@ -1,5 +1,5 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import { Pencil, Plus, Trash2, X } from 'lucide-react';
+import { Pencil, Plus, Sparkles, Trash2, X } from 'lucide-react';
 import { FormEvent, useState } from 'react';
 import { api } from '../api';
 import type { Food } from '../../shared/types';
@@ -22,6 +22,8 @@ export function FoodLibraryScreen() {
   const { showToast } = useToast();
   const [foodForm, setFoodForm] = useState<FoodForm>(emptyFood);
   const [editingFoodId, setEditingFoodId] = useState<number | null>(null);
+  const [aiLookupText, setAiLookupText] = useState('');
+  const [aiLookupNote, setAiLookupNote] = useState('');
 
   const { data: foods = [] } = useQuery({ queryKey: ['foods'], queryFn: api.foods });
 
@@ -63,6 +65,25 @@ export function FoodLibraryScreen() {
     }
   });
 
+  const estimateFood = useMutation({
+    mutationFn: api.estimateNutrition,
+    onSuccess: (estimate) => {
+      setFoodForm({
+        name: estimate.label,
+        servingQty: estimate.servingQty,
+        servingUnit: estimate.servingUnit,
+        calories: estimate.calories,
+        protein: estimate.protein,
+        carbs: estimate.carbs,
+        fat: estimate.fat
+      });
+      setAiLookupNote(`${estimate.confidence} confidence · ${estimate.note}`);
+      setEditingFoodId(null);
+      showToast('Food details ready to review');
+    },
+    onError: (error) => showToast(error instanceof Error ? error.message : 'Could not estimate food')
+  });
+
   const submitFood = (event: FormEvent) => {
     event.preventDefault();
     if (editingFoodId) {
@@ -70,6 +91,11 @@ export function FoodLibraryScreen() {
     } else {
       createFood.mutate(foodForm);
     }
+  };
+
+  const submitAiLookup = (event: FormEvent) => {
+    event.preventDefault();
+    estimateFood.mutate({ target: 'food', text: aiLookupText });
   };
 
   const editFood = (food: Food) => {
@@ -93,6 +119,23 @@ export function FoodLibraryScreen() {
   return (
     <>
       <Header title="Foods" subtitle="Add and edit saved foods." />
+
+      <section className="panel compact-form ai-panel">
+        <div className="form-heading">
+          <h2>AI food lookup</h2>
+          <Sparkles size={18} />
+        </div>
+        <form className="compact-form" onSubmit={submitAiLookup}>
+          <Field label="Food">
+            <input value={aiLookupText} onChange={(event) => setAiLookupText(event.target.value)} placeholder="nectarine" />
+          </Field>
+          <button className="primary-button" type="submit" disabled={estimateFood.isPending || !aiLookupText.trim()}>
+            <Sparkles size={18} />
+            {estimateFood.isPending ? 'Looking up...' : 'Fill food form'}
+          </button>
+        </form>
+        {aiLookupNote ? <p className="ai-note">{aiLookupNote}</p> : null}
+      </section>
 
       <form className="panel compact-form" onSubmit={submitFood}>
         <div className="form-heading">

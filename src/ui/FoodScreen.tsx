@@ -1,10 +1,16 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import { CalendarDays, ListPlus, Trash2, Utensils } from 'lucide-react';
-import { FormEvent, useState } from 'react';
+import { Camera, CalendarDays, ListPlus, Sparkles, Trash2, Utensils, X } from 'lucide-react';
+import { ChangeEvent, FormEvent, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { api } from '../api';
 import { today } from '../date';
 import { Field, Header, MacroBar, MacroPills, useToast } from './components';
+import type { DirectFoodLogInput } from '../../shared/types';
+
+type AiLogDraft = Omit<DirectFoodLogInput, 'date'> & {
+  note: string;
+  confidence: 'low' | 'medium' | 'high';
+};
 
 export function FoodScreen() {
   const queryClient = useQueryClient();
@@ -13,6 +19,10 @@ export function FoodScreen() {
   const [quickFoodId, setQuickFoodId] = useState('');
   const [quickMealId, setQuickMealId] = useState('');
   const [quantity, setQuantity] = useState(1);
+  const [aiText, setAiText] = useState('');
+  const [aiImageDataUrl, setAiImageDataUrl] = useState('');
+  const [aiImageName, setAiImageName] = useState('');
+  const [aiDraft, setAiDraft] = useState<AiLogDraft | null>(null);
 
   const { data: settings } = useQuery({ queryKey: ['settings'], queryFn: api.settings });
   const { data: foods = [] } = useQuery({ queryKey: ['foods'], queryFn: api.foods });
@@ -34,6 +44,37 @@ export function FoodScreen() {
     }
   });
 
+  const logDirectFood = useMutation({
+    mutationFn: api.logDirectFood,
+    onSuccess: () => {
+      invalidateFoodDay();
+      showToast('AI estimate logged');
+      setAiDraft(null);
+      setAiText('');
+      setAiImageDataUrl('');
+      setAiImageName('');
+    },
+    onError: (error) => showToast(error instanceof Error ? error.message : 'Could not log estimate')
+  });
+
+  const estimateNutrition = useMutation({
+    mutationFn: api.estimateNutrition,
+    onSuccess: (estimate) => {
+      setAiDraft({
+        label: estimate.label,
+        quantity: 1,
+        calories: estimate.calories,
+        protein: estimate.protein,
+        carbs: estimate.carbs,
+        fat: estimate.fat,
+        note: estimate.note,
+        confidence: estimate.confidence
+      });
+      showToast('Estimate ready to review');
+    },
+    onError: (error) => showToast(error instanceof Error ? error.message : 'Could not estimate nutrition')
+  });
+
   const deleteLog = useMutation({
     mutationFn: api.deleteFoodLog,
     onSuccess: () => {
@@ -46,6 +87,36 @@ export function FoodScreen() {
     event.preventDefault();
     if (quickFoodId) logFood.mutate({ date, foodId: Number(quickFoodId), quantity });
     if (quickMealId) logFood.mutate({ date, mealId: Number(quickMealId), quantity });
+  };
+
+  const estimateAiLog = (event: FormEvent) => {
+    event.preventDefault();
+    estimateNutrition.mutate({
+      target: 'log',
+      text: aiText || undefined,
+      image: aiImageDataUrl ? { dataUrl: aiImageDataUrl } : undefined
+    });
+  };
+
+  const submitAiDraft = (event: FormEvent) => {
+    event.preventDefault();
+    if (!aiDraft) return;
+    logDirectFood.mutate({ date, ...aiDraft });
+  };
+
+  const updateAiDraft = (patch: Partial<AiLogDraft>) => {
+    if (aiDraft) setAiDraft({ ...aiDraft, ...patch });
+  };
+
+  const attachAiImage = (event: ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = () => {
+      setAiImageDataUrl(String(reader.result));
+      setAiImageName(file.name);
+    };
+    reader.readAsDataURL(file);
   };
 
   return (
@@ -99,6 +170,54 @@ export function FoodScreen() {
           Log entry
         </button>
       </form>
+
+      <section className="panel compact-form ai-panel">
+        <div className="form-heading">
+          <h2>AI estimate</h2>
+          <Sparkles size={18} />
+        </div>
+        <form className="compact-form" onSubmit={estimateAiLog}>
+          <Field label="Meal description">
+            <textarea rows={3} value={aiText} onChange={(event) => setAiText(event.target.value)} placeholder="Sushi roll, miso soup, and edamame" />
+          </Field>
+          <label className="secondary-button file-button">
+            <Camera size={18} />
+            {aiImageName || 'Add photo'}
+            <input type="file" accept="image/png,image/jpeg,image/webp" capture="environment" onChange={attachAiImage} />
+          </label>
+          {aiImageName ? (
+            <button className="secondary-button" type="button" onClick={() => { setAiImageDataUrl(''); setAiImageName(''); }}>
+              <X size={18} />
+              Remove photo
+            </button>
+          ) : null}
+          <button className="primary-button" type="submit" disabled={estimateNutrition.isPending || (!aiText && !aiImageDataUrl)}>
+            <Sparkles size={18} />
+            {estimateNutrition.isPending ? 'Estimating...' : 'Estimate macros'}
+          </button>
+        </form>
+
+        {aiDraft ? (
+          <form className="compact-form ai-review" onSubmit={submitAiDraft}>
+            <div>
+              <h2>Review estimate</h2>
+              <p>{aiDraft.confidence} confidence · {aiDraft.note}</p>
+            </div>
+            <Field label="Label"><input value={aiDraft.label} onChange={(event) => updateAiDraft({ label: event.target.value })} required /></Field>
+            <Field label="Servings"><input type="number" inputMode="decimal" step="0.25" min="0.01" value={aiDraft.quantity} onChange={(event) => updateAiDraft({ quantity: Number(event.target.value) })} /></Field>
+            <div className="two-col">
+              <Field label="Calories"><input type="number" min="0" value={aiDraft.calories} onChange={(event) => updateAiDraft({ calories: Number(event.target.value) })} /></Field>
+              <Field label="Protein"><input type="number" min="0" value={aiDraft.protein} onChange={(event) => updateAiDraft({ protein: Number(event.target.value) })} /></Field>
+              <Field label="Carbs"><input type="number" min="0" value={aiDraft.carbs} onChange={(event) => updateAiDraft({ carbs: Number(event.target.value) })} /></Field>
+              <Field label="Fat"><input type="number" min="0" value={aiDraft.fat} onChange={(event) => updateAiDraft({ fat: Number(event.target.value) })} /></Field>
+            </div>
+            <button className="primary-button" type="submit" disabled={logDirectFood.isPending}>
+              <Utensils size={18} />
+              {logDirectFood.isPending ? 'Logging...' : 'Log estimate'}
+            </button>
+          </form>
+        ) : null}
+      </section>
 
       <section className="list">
         {summary?.logs.length ? summary.logs.map((log) => (

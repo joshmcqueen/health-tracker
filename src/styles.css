@@ -24,7 +24,8 @@ body {
 
 button,
 input,
-select {
+select,
+textarea {
   font: inherit;
 }
 
@@ -132,7 +133,8 @@ h2 {
 }
 
 input,
-select {
+select,
+textarea {
   width: 100%;
   min-height: 46px;
   border: 1px solid #cedbd4;
@@ -143,9 +145,14 @@ select {
 }
 
 input:focus,
-select:focus {
+select:focus,
+textarea:focus {
   border-color: #24745b;
   outline: 3px solid rgba(36, 116, 91, 0.16);
+}
+
+textarea {
+  resize: vertical;
 }
 
 .primary-button,
@@ -179,6 +186,37 @@ select:focus {
   background: #eef7f3;
   color: #1d5c49;
   padding: 10px 12px;
+}
+
+.file-button {
+  width: 100%;
+}
+
+.file-button input {
+  display: none;
+}
+
+.ai-panel {
+  gap: 14px;
+}
+
+.ai-panel > svg,
+.form-heading > svg {
+  color: #24745b;
+  flex: 0 0 auto;
+}
+
+.ai-review {
+  border-top: 1px solid #e7eeea;
+  padding-top: 14px;
+}
+
+.ai-review p,
+.ai-note {
+  margin-top: 5px;
+  color: #617369;
+  font-size: 0.86rem;
+  line-height: 1.35;
 }
 
 .range-preset-group {

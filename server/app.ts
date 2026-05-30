@@ -1,8 +1,9 @@
 import cors from 'cors';
 import express from 'express';
 import type { AppDatabase } from './db';
+import { AiConfigurationError, createNutritionEstimator, type NutritionEstimator } from './aiNutrition';
 import { createRepository } from './repository';
-import { foodLogSchema, foodLogUpdateSchema, foodSchema, mealSchema, rangeSchema, settingsSchema, weightLogSchema } from './validators';
+import { aiNutritionEstimateSchema, directFoodLogSchema, foodLogSchema, foodLogUpdateSchema, foodSchema, mealSchema, rangeSchema, settingsSchema, weightLogSchema } from './validators';
 
 function parseId(value: string) {
   const id = Number(value);
@@ -20,12 +21,17 @@ function handleError(res: express.Response, error: unknown) {
   return res.status(500).json({ error: 'Something went wrong.' });
 }
 
-export function createApp(db: AppDatabase) {
+type AppOptions = {
+  estimateNutrition?: NutritionEstimator;
+};
+
+export function createApp(db: AppDatabase, options: AppOptions = {}) {
   const app = express();
   const repo = createRepository(db);
+  const estimateNutrition = options.estimateNutrition ?? createNutritionEstimator();
 
   app.use(cors());
-  app.use(express.json());
+  app.use(express.json({ limit: '7mb' }));
 
   app.get('/api/health', (_req, res) => res.json({ ok: true }));
 
@@ -119,6 +125,13 @@ export function createApp(db: AppDatabase) {
       return handleError(res, error);
     }
   });
+  app.post('/api/food-logs/direct', (req, res) => {
+    try {
+      res.status(201).json(repo.logDirectFood(directFoodLogSchema.parse(req.body)));
+    } catch (error) {
+      return handleError(res, error);
+    }
+  });
   app.put('/api/food-logs/:id', (req, res) => {
     try {
       const id = parseId(req.params.id);
@@ -151,6 +164,17 @@ export function createApp(db: AppDatabase) {
       res.json(repo.getChartPoints(range.from, range.to));
     } catch (error) {
       handleError(res, error);
+    }
+  });
+
+  app.post('/api/ai/nutrition-estimate', async (req, res) => {
+    try {
+      res.json(await estimateNutrition(aiNutritionEstimateSchema.parse(req.body)));
+    } catch (error) {
+      if (error instanceof AiConfigurationError) {
+        return res.status(503).json({ error: error.message });
+      }
+      return handleError(res, error);
     }
   });
 

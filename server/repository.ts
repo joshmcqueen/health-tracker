@@ -1,5 +1,5 @@
 import type { AppDatabase } from './db';
-import type { ChartPoint, DailySummary, Food, FoodLog, MacroTotals, Meal, MealItem, Settings, WeightLog } from '../shared/types';
+import type { ChartPoint, DailySummary, DirectFoodLogInput, Food, FoodLog, MacroTotals, Meal, MealItem, Settings, WeightLog } from '../shared/types';
 
 type DbSettings = {
   calorie_goal: number;
@@ -191,6 +191,17 @@ export function createRepository(db: AppDatabase) {
     return mapFoodLog(row);
   };
 
+  const logDirectFood = (input: DirectFoodLogInput) => {
+    const normalized = normalizeTotals(input);
+    const result = db.prepare(`
+      INSERT INTO food_logs (date, food_id, meal_id, label, quantity, calories, protein, carbs, fat)
+      VALUES (?, NULL, NULL, ?, ?, ?, ?, ?, ?)
+    `).run(input.date, input.label, input.quantity, normalized.calories, normalized.protein, normalized.carbs, normalized.fat);
+
+    const row = db.prepare('SELECT * FROM food_logs WHERE id = ?').get(result.lastInsertRowid) as DbFoodLog;
+    return mapFoodLog(row);
+  };
+
   const getDailySummary = (date: string): DailySummary => {
     const logs = (db.prepare('SELECT * FROM food_logs WHERE date = ? ORDER BY created_at DESC, id DESC').all(date) as DbFoodLog[]).map(mapFoodLog);
     const totals = logs.reduce((acc, log) => {
@@ -294,6 +305,7 @@ export function createRepository(db: AppDatabase) {
       db.prepare('DELETE FROM food_logs WHERE id = ?').run(next.id);
       return db.prepare('SELECT * FROM food_logs WHERE id = ?').get(id) ? mapFoodLog(db.prepare('SELECT * FROM food_logs WHERE id = ?').get(id) as DbFoodLog) : null;
     },
+    logDirectFood,
     deleteFoodLog: (id: number) => db.prepare('DELETE FROM food_logs WHERE id = ?').run(id).changes,
     getDailySummary,
     getChartPoints

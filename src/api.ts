@@ -1,4 +1,4 @@
-import type { ChartPoint, DailySummary, Food, FoodLog, Meal, Settings, WeightLog } from '../shared/types';
+import type { AiNutritionEstimate, AiNutritionEstimateRequest, ChartPoint, DailySummary, DirectFoodLogInput, Food, FoodLog, Meal, Settings, WeightLog } from '../shared/types';
 
 type RequestOptions = {
   method?: string;
@@ -39,6 +39,8 @@ export const api = {
   dailySummary: (date: string) => request<DailySummary>(`/api/summary/daily?date=${date}`),
   foodLogs: (date: string) => request<FoodLog[]>(`/api/food-logs?date=${date}`),
   logFood: (body: { date: string; foodId?: number; mealId?: number; quantity: number }) => request<FoodLog>('/api/food-logs', { method: 'POST', body }),
+  logDirectFood: (body: DirectFoodLogInput) => request<FoodLog>('/api/food-logs/direct', { method: 'POST', body }),
   deleteFoodLog: (id: number) => request<void>(`/api/food-logs/${id}`, { method: 'DELETE' }),
-  charts: (from: string, to: string) => request<ChartPoint[]>(`/api/charts?from=${from}&to=${to}`)
+  charts: (from: string, to: string) => request<ChartPoint[]>(`/api/charts?from=${from}&to=${to}`),
+  estimateNutrition: (body: AiNutritionEstimateRequest) => request<AiNutritionEstimate>('/api/ai/nutrition-estimate', { method: 'POST', body })
 };

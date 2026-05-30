@@ -63,6 +63,37 @@ export type FoodLog = {
   createdAt: string;
 };
 
+export type DirectFoodLogInput = {
+  date: string;
+  label: string;
+  quantity: number;
+  calories: number;
+  protein: number;
+  carbs: number;
+  fat: number;
+};
+
+export type AiNutritionEstimateRequest = {
+  target: 'food' | 'log';
+  text?: string;
+  image?: {
+    dataUrl: string;
+  };
+};
+
+export type AiNutritionEstimate = {
+  target: 'food' | 'log';
+  label: string;
+  servingQty: number;
+  servingUnit: string;
+  calories: number;
+  protein: number;
+  carbs: number;
+  fat: number;
+  confidence: 'low' | 'medium' | 'high';
+  note: string;
+};
+
 export type DailySummary = {
   date: string;
   settings: Settings;
