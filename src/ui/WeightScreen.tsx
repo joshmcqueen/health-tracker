@@ -1,8 +1,8 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import { Edit3, Plus, Trash2 } from 'lucide-react';
+import { ChevronLeft, ChevronRight, Edit3, Plus, Trash2 } from 'lucide-react';
 import { FormEvent, useState } from 'react';
 import { api } from '../api';
-import { readableDate, today } from '../date';
+import { addDays, readableDate, today } from '../date';
 import type { WeightLog } from '../../shared/types';
 import { Field, Header, useToast } from './components';
 
@@ -13,6 +13,7 @@ const blankForm = (): WeightForm => ({ date: today(), weight: 0, note: null });
 export function WeightScreen() {
   const queryClient = useQueryClient();
   const { showToast } = useToast();
+  const currentDate = today();
   const { data: logs = [] } = useQuery({ queryKey: ['weight-logs'], queryFn: api.weightLogs });
   const { data: settings } = useQuery({ queryKey: ['settings'], queryFn: api.settings });
   const [editingId, setEditingId] = useState<number | null>(null);
@@ -48,12 +49,24 @@ export function WeightScreen() {
     setForm({ date: log.date, weight: log.weight, note: log.note });
   };
 
+  const goToPreviousDay = () => setForm((current) => ({ ...current, date: addDays(current.date, -1) }));
+  const goToNextDay = () => setForm((current) => ({ ...current, date: addDays(current.date, 1) }));
+  const isCurrentDate = form.date >= currentDate;
+
   return (
     <>
       <Header title="Weight" subtitle="Track daily weigh-ins and quick notes." />
       <form className="panel form-grid" onSubmit={submit}>
         <Field label="Date">
-          <input type="date" value={form.date} onChange={(event) => setForm({ ...form, date: event.target.value })} required />
+          <div className="date-stepper">
+            <button className="icon-button" type="button" aria-label="Previous day" onClick={goToPreviousDay}>
+              <ChevronLeft size={18} />
+            </button>
+            <input type="date" value={form.date} max={currentDate} onChange={(event) => setForm({ ...form, date: event.target.value })} required />
+            <button className="icon-button" type="button" aria-label="Next day" onClick={goToNextDay} disabled={isCurrentDate}>
+              <ChevronRight size={18} />
+            </button>
+          </div>
         </Field>
         <Field label={`Weight (${settings?.weightUnit ?? 'lb'})`}>
           <input inputMode="decimal" type="number" step="0.1" value={form.weight || ''} onChange={(event) => setForm({ ...form, weight: Number(event.target.value) })} required />

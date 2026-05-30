@@ -1,9 +1,9 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import { Camera, CalendarDays, ListPlus, Sparkles, Trash2, Utensils, X } from 'lucide-react';
+import { Camera, CalendarDays, ChevronLeft, ChevronRight, ListPlus, Sparkles, Trash2, Utensils, X } from 'lucide-react';
 import { ChangeEvent, FormEvent, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { api } from '../api';
-import { today } from '../date';
+import { addDays, today } from '../date';
 import { Field, Header, MacroBar, MacroPills, NumberInput, useToast } from './components';
 import type { DirectFoodLogInput } from '../../shared/types';
 
@@ -15,7 +15,8 @@ type AiLogDraft = Omit<DirectFoodLogInput, 'date'> & {
 export function FoodScreen() {
   const queryClient = useQueryClient();
   const { showToast } = useToast();
-  const [date, setDate] = useState(today());
+  const currentDate = today();
+  const [date, setDate] = useState(currentDate);
   const [quickFoodId, setQuickFoodId] = useState('');
   const [quickMealId, setQuickMealId] = useState('');
   const [quantity, setQuantity] = useState(1);
@@ -108,6 +109,10 @@ export function FoodScreen() {
     if (aiDraft) setAiDraft({ ...aiDraft, ...patch });
   };
 
+  const goToPreviousDay = () => setDate((current) => addDays(current, -1));
+  const goToNextDay = () => setDate((current) => addDays(current, 1));
+  const isCurrentDate = date >= currentDate;
+
   const attachAiImage = (event: ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
     if (!file) return;
@@ -126,7 +131,15 @@ export function FoodScreen() {
       <section className="panel daily-card">
         <div className="date-row">
           <CalendarDays size={18} />
-          <input aria-label="Food log date" type="date" value={date} onChange={(event) => setDate(event.target.value)} />
+          <div className="date-stepper">
+            <button className="icon-button" type="button" aria-label="Previous day" onClick={goToPreviousDay}>
+              <ChevronLeft size={18} />
+            </button>
+            <input aria-label="Food log date" type="date" value={date} max={currentDate} onChange={(event) => setDate(event.target.value)} />
+            <button className="icon-button" type="button" aria-label="Next day" onClick={goToNextDay} disabled={isCurrentDate}>
+              <ChevronRight size={18} />
+            </button>
+          </div>
         </div>
         {summary && settings ? (
           <>

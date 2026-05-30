@@ -345,9 +345,37 @@ textarea {
 
 .date-row {
   display: grid;
-  grid-template-columns: auto 1fr;
+  grid-template-columns: auto minmax(0, 1fr);
   align-items: center;
   gap: 8px;
+}
+
+.date-row > svg {
+  color: #17211c;
+  flex: 0 0 auto;
+}
+
+.date-stepper {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 6px;
+  min-width: 0;
+}
+
+.date-stepper input {
+  min-width: 0;
+}
+
+.date-stepper .icon-button {
+  width: 38px;
+  min-height: 46px;
+}
+
+.icon-button:disabled,
+.icon-actions button:disabled {
+  cursor: not-allowed;
+  opacity: 0.42;
 }
 
 .calorie-hero {
