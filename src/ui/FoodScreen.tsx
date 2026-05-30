@@ -1,5 +1,5 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import { Camera, CalendarDays, ChevronLeft, ChevronRight, ListPlus, Sparkles, Trash2, Utensils, X } from 'lucide-react';
+import { Camera, ChevronLeft, ChevronRight, ListPlus, Sparkles, Trash2, Utensils, X } from 'lucide-react';
 import { ChangeEvent, FormEvent, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { api } from '../api';
@@ -130,7 +130,6 @@ export function FoodScreen() {
 
       <section className="panel daily-card">
         <div className="date-row">
-          <CalendarDays size={18} />
           <div className="date-stepper">
             <button className="icon-button" type="button" aria-label="Previous day" onClick={goToPreviousDay}>
               <ChevronLeft size={18} />

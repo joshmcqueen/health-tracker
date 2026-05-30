@@ -344,27 +344,27 @@ textarea {
 }
 
 .date-row {
-  display: grid;
-  grid-template-columns: auto minmax(0, 1fr);
-  align-items: center;
-  gap: 8px;
-}
-
-.date-row > svg {
-  color: #17211c;
-  flex: 0 0 auto;
+  min-width: 0;
 }
 
 .date-stepper {
   display: grid;
-  grid-template-columns: auto minmax(0, 1fr) auto;
+  grid-template-columns: 38px minmax(0, 1fr) 38px;
   align-items: center;
   gap: 6px;
   min-width: 0;
+  width: 100%;
 }
 
 .date-stepper input {
   min-width: 0;
+  max-width: 100%;
+  overflow: hidden;
+  padding-inline: 8px;
+  text-align: center;
+  white-space: nowrap;
+  -webkit-appearance: none;
+  appearance: none;
 }
 
 .date-stepper .icon-button {
