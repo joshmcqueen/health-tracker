@@ -3,7 +3,7 @@ import { Pencil, Plus, Trash2, X } from 'lucide-react';
 import { FormEvent, useMemo, useState } from 'react';
 import { api } from '../api';
 import type { Meal } from '../../shared/types';
-import { Field, Header, MacroPills, useToast } from './components';
+import { Field, Header, MacroPills, NumberInput, useToast } from './components';
 
 export function MealLibraryScreen() {
   const queryClient = useQueryClient();
@@ -96,9 +96,9 @@ export function MealLibraryScreen() {
               <option value="">Food</option>
               {foods.map((food) => <option key={food.id} value={food.id}>{food.name}</option>)}
             </select>
-            <input aria-label="Meal item servings" type="number" step="0.25" min="0.01" value={item.quantity} onChange={(event) => {
+            <NumberInput aria-label="Meal item servings" inputMode="numeric" min="1" step={1} value={item.quantity} onValueChange={(quantity) => {
               const next = [...mealItems];
-              next[index] = { ...item, quantity: Number(event.target.value) };
+              next[index] = { ...item, quantity };
               setMealItems(next);
             }} />
             <button type="button" className="icon-button" aria-label="Remove meal item" onClick={() => setMealItems(mealItems.filter((_, itemIndex) => itemIndex !== index))}>
