@@ -6,9 +6,9 @@ import { addDays, readableDate, today } from '../date';
 import type { WeightLog } from '../../shared/types';
 import { Field, Header, useToast } from './components';
 
-type WeightForm = Pick<WeightLog, 'date' | 'weight' | 'note'>;
+type WeightForm = Pick<WeightLog, 'date' | 'weight'>;
 
-const blankForm = (): WeightForm => ({ date: today(), weight: 0, note: null });
+const blankForm = (): WeightForm => ({ date: today(), weight: 0 });
 
 export function WeightScreen() {
   const queryClient = useQueryClient();
@@ -46,7 +46,7 @@ export function WeightScreen() {
 
   const startEdit = (log: WeightLog) => {
     setEditingId(log.id);
-    setForm({ date: log.date, weight: log.weight, note: log.note });
+    setForm({ date: log.date, weight: log.weight });
   };
 
   const goToPreviousDay = () => setForm((current) => ({ ...current, date: addDays(current.date, -1) }));
@@ -55,7 +55,7 @@ export function WeightScreen() {
 
   return (
     <>
-      <Header title="Weight" subtitle="Track daily weigh-ins and quick notes." />
+      <Header title="Weight" subtitle="Track daily weigh-ins." />
       <form className="panel form-grid" onSubmit={submit}>
         <Field label="Date">
           <div className="date-stepper">
@@ -71,9 +71,6 @@ export function WeightScreen() {
         <Field label={`Weight (${settings?.weightUnit ?? 'lb'})`}>
           <input inputMode="decimal" type="number" step="0.1" value={form.weight || ''} onChange={(event) => setForm({ ...form, weight: Number(event.target.value) })} required />
         </Field>
-        <Field label="Note">
-          <input value={form.note ?? ''} onChange={(event) => setForm({ ...form, note: event.target.value || null })} placeholder="Optional" />
-        </Field>
         <button className="primary-button" type="submit">
           <Plus size={18} />
           {editingId ? 'Save weigh-in' : 'Add weigh-in'}
@@ -85,7 +82,7 @@ export function WeightScreen() {
           <article className="list-card" key={log.id}>
             <div>
               <strong>{log.weight.toFixed(1)} {settings?.weightUnit ?? 'lb'}</strong>
-              <p>{readableDate(log.date)}{log.note ? ` · ${log.note}` : ''}</p>
+              <p>{readableDate(log.date)}</p>
             </div>
             <div className="icon-actions">
               <button type="button" aria-label="Edit weight log" onClick={() => startEdit(log)}><Edit3 size={18} /></button>

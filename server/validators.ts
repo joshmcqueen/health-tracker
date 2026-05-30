@@ -3,7 +3,6 @@ import { z } from 'zod';
 const dateString = z.string().regex(/^\d{4}-\d{2}-\d{2}$/);
 const positiveNumber = z.coerce.number().positive();
 const nonNegativeNumber = z.coerce.number().min(0);
-const optionalText = z.string().trim().optional().nullable().transform((value) => value || null);
 const imageDataUrl = z.string()
   .max(6_500_000)
   .regex(/^data:image\/(png|jpeg|jpg|webp);base64,[A-Za-z0-9+/=\s]+$/);
@@ -18,8 +17,7 @@ export const settingsSchema = z.object({
 
 export const weightLogSchema = z.object({
   date: dateString,
-  weight: positiveNumber,
-  note: optionalText
+  weight: positiveNumber
 });
 
 export const foodSchema = z.object({

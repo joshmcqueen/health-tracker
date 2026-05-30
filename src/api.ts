@@ -5,6 +5,8 @@ type RequestOptions = {
   body?: unknown;
 };
 
+type WeightLogInput = Pick<WeightLog, 'date' | 'weight'>;
+
 async function request<T>(url: string, options: RequestOptions = {}): Promise<T> {
   const response = await fetch(url, {
     method: options.method ?? 'GET',
@@ -25,8 +27,8 @@ export const api = {
   settings: () => request<Settings>('/api/settings'),
   updateSettings: (body: Settings) => request<Settings>('/api/settings', { method: 'PUT', body }),
   weightLogs: () => request<WeightLog[]>('/api/weight-logs'),
-  createWeightLog: (body: Pick<WeightLog, 'date' | 'weight' | 'note'>) => request<WeightLog>('/api/weight-logs', { method: 'POST', body }),
-  updateWeightLog: (id: number, body: Pick<WeightLog, 'date' | 'weight' | 'note'>) => request<WeightLog>(`/api/weight-logs/${id}`, { method: 'PUT', body }),
+  createWeightLog: (body: WeightLogInput) => request<WeightLog>('/api/weight-logs', { method: 'POST', body }),
+  updateWeightLog: (id: number, body: WeightLogInput) => request<WeightLog>(`/api/weight-logs/${id}`, { method: 'PUT', body }),
   deleteWeightLog: (id: number) => request<void>(`/api/weight-logs/${id}`, { method: 'DELETE' }),
   foods: () => request<Food[]>('/api/foods'),
   createFood: (body: Omit<Food, 'id' | 'createdAt'>) => request<Food>('/api/foods', { method: 'POST', body }),

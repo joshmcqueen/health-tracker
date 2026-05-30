@@ -16,10 +16,10 @@ function upsertFood(input: Parameters<typeof repo.createFood>[0]) {
   return existing ?? repo.createFood(input);
 }
 
-function safeWeightLog(date: string, weight: number, note: string | null = null) {
+function safeWeightLog(date: string, weight: number) {
   const existing = repo.listWeightLogs().find((log) => log.date === date);
-  if (existing) return repo.updateWeightLog(existing.id, { date, weight, note });
-  return repo.createWeightLog({ date, weight, note });
+  if (existing) return repo.updateWeightLog(existing.id, { date, weight });
+  return repo.createWeightLog({ date, weight });
 }
 
 function recreateMeal(name: string, items: Array<{ foodId: number; quantity: number }>) {
@@ -73,7 +73,7 @@ const eggSnack = recreateMeal('Egg Snack', [
 for (let i = 20; i >= 0; i -= 2) {
   const trend = 203.8 - (20 - i) * 0.11;
   const wobble = [0, -0.4, 0.2, -0.1, 0.3][i % 5];
-  safeWeightLog(isoDate(i), Number((trend + wobble).toFixed(1)), i === 0 ? 'Seeded current weight' : null);
+  safeWeightLog(isoDate(i), Number((trend + wobble).toFixed(1)));
 }
 
 for (let i = 13; i >= 0; i--) {

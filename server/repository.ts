@@ -78,12 +78,11 @@ function mapFoodLog(row: DbFoodLog): FoodLog {
   };
 }
 
-function mapWeightLog(row: { id: number; date: string; weight: number; note: string | null; created_at: string }): WeightLog {
+function mapWeightLog(row: { id: number; date: string; weight: number; created_at: string }): WeightLog {
   return {
     id: row.id,
     date: row.date,
     weight: row.weight,
-    note: row.note,
     createdAt: row.created_at
   };
 }
@@ -255,14 +254,14 @@ export function createRepository(db: AppDatabase) {
       `).run(settings.calorieGoal, settings.proteinGoal, settings.carbsGoal, settings.fatGoal, settings.weightUnit);
       return mapSettings(db.prepare('SELECT * FROM settings WHERE id = 1').get() as DbSettings);
     },
-    listWeightLogs: () => (db.prepare('SELECT * FROM weight_logs ORDER BY date DESC').all() as Array<{ id: number; date: string; weight: number; note: string | null; created_at: string }>).map(mapWeightLog),
-    createWeightLog: (input: { date: string; weight: number; note: string | null }) => {
-      const result = db.prepare('INSERT INTO weight_logs (date, weight, note) VALUES (?, ?, ?)').run(input.date, input.weight, input.note);
-      return mapWeightLog(db.prepare('SELECT * FROM weight_logs WHERE id = ?').get(result.lastInsertRowid) as { id: number; date: string; weight: number; note: string | null; created_at: string });
+    listWeightLogs: () => (db.prepare('SELECT * FROM weight_logs ORDER BY date DESC').all() as Array<{ id: number; date: string; weight: number; created_at: string }>).map(mapWeightLog),
+    createWeightLog: (input: { date: string; weight: number }) => {
+      const result = db.prepare('INSERT INTO weight_logs (date, weight) VALUES (?, ?)').run(input.date, input.weight);
+      return mapWeightLog(db.prepare('SELECT * FROM weight_logs WHERE id = ?').get(result.lastInsertRowid) as { id: number; date: string; weight: number; created_at: string });
     },
-    updateWeightLog: (id: number, input: { date: string; weight: number; note: string | null }) => {
-      db.prepare('UPDATE weight_logs SET date = ?, weight = ?, note = ? WHERE id = ?').run(input.date, input.weight, input.note, id);
-      const row = db.prepare('SELECT * FROM weight_logs WHERE id = ?').get(id) as { id: number; date: string; weight: number; note: string | null; created_at: string } | undefined;
+    updateWeightLog: (id: number, input: { date: string; weight: number }) => {
+      db.prepare('UPDATE weight_logs SET date = ?, weight = ? WHERE id = ?').run(input.date, input.weight, id);
+      const row = db.prepare('SELECT * FROM weight_logs WHERE id = ?').get(id) as { id: number; date: string; weight: number; created_at: string } | undefined;
       return row ? mapWeightLog(row) : undefined;
     },
     deleteWeightLog: (id: number) => db.prepare('DELETE FROM weight_logs WHERE id = ?').run(id).changes,

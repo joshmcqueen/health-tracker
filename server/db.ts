@@ -36,7 +36,6 @@ export function migrate(db: AppDatabase) {
       id INTEGER PRIMARY KEY AUTOINCREMENT,
       date TEXT NOT NULL UNIQUE,
       weight REAL NOT NULL,
-      note TEXT,
       created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP
     );
 
@@ -86,5 +85,10 @@ export function migrate(db: AppDatabase) {
   const foodColumns = db.prepare('PRAGMA table_info(foods)').all() as Array<{ name: string }>;
   if (foodColumns.some((column) => column.name === 'brand')) {
     db.exec('ALTER TABLE foods DROP COLUMN brand');
+  }
+
+  const weightColumns = db.prepare('PRAGMA table_info(weight_logs)').all() as Array<{ name: string }>;
+  if (weightColumns.some((column) => column.name === 'note')) {
+    db.exec('ALTER TABLE weight_logs DROP COLUMN note');
   }
 }

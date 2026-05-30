@@ -19,11 +19,11 @@ afterEach(() => {
 
 describe('health tracker backend', () => {
   it('creates, edits, and deletes weight logs', () => {
-    const created = repo.createWeightLog({ date: '2026-05-29', weight: 201.4, note: 'morning' });
+    const created = repo.createWeightLog({ date: '2026-05-29', weight: 201.4 });
     expect(created.weight).toBe(201.4);
 
-    const updated = repo.updateWeightLog(created.id, { date: '2026-05-29', weight: 200.8, note: 'after walk' });
-    expect(updated).toMatchObject({ weight: 200.8, note: 'after walk' });
+    const updated = repo.updateWeightLog(created.id, { date: '2026-05-29', weight: 200.8 });
+    expect(updated).toMatchObject({ weight: 200.8 });
 
     expect(repo.deleteWeightLog(created.id)).toBe(1);
     expect(repo.listWeightLogs()).toHaveLength(0);
@@ -84,7 +84,7 @@ describe('health tracker backend', () => {
   });
 
   it('aggregates chart ranges across weight and food', () => {
-    repo.createWeightLog({ date: '2026-05-28', weight: 202, note: null });
+    repo.createWeightLog({ date: '2026-05-28', weight: 202 });
     const food = repo.createFood({ name: 'Eggs', servingQty: 2, servingUnit: 'eggs', calories: 140, protein: 12, carbs: 1, fat: 10 });
     repo.logFood({ date: '2026-05-28', foodId: food.id, quantity: 2 });
 

@@ -17,7 +17,6 @@ export type WeightLog = {
   id: number;
   date: string;
   weight: number;
-  note: string | null;
   createdAt: string;
 };
 
